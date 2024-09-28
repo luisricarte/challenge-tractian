@@ -1,0 +1,17 @@
+.titleContainer {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.titleTextContainer {
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  gap: 0.5rem;
+}
+
+.titleButtonContainer {
+  display: flex;
+  gap: 1rem;
+}
