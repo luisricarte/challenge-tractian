@@ -1,8 +1,8 @@
 import React from "react";
-import { SideBar } from "../../components/side-bar";
-import { TopBar } from "../../components/topbar";
+import { TopBar } from "../../components/top-bar";
 import styles from "./styles.module.css";
-import { TitleContent } from "../../components/titleContent";
+import { TitleContent } from "../../components/title-content";
+import { LoadContent } from "../../components/load-content";
 
 export const LandingPage: React.FC = () => {
   return (
@@ -10,10 +10,7 @@ export const LandingPage: React.FC = () => {
       <TopBar />
       <div className={styles.container}>
         <TitleContent />
-
-        <SideBar />
-
-        <div id="right-show-bar"></div>
+        <LoadContent />
       </div>
     </div>
   );
