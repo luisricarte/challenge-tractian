@@ -2,8 +2,8 @@
   background-color: #023b78;
   color: white;
   border: none;
-  padding: 0.625rem;
-  border-radius: 0.5rem;
+  padding: 0.3rem 0.75rem 0.3rem 0.75rem;
+  border-radius: 0.125rem;
   cursor: pointer;
 }
 
@@ -12,11 +12,10 @@
 }
 
 .button-secondary {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  background-color: transparent;
+  border: "1px solid #D8DFE6";
+  padding: 0.3rem 0.75rem 0.3rem 0.75rem;
+  border-radius: 0.125rem;
   cursor: pointer;
 }
 
@@ -25,16 +24,15 @@
 }
 
 .button-active {
-  background-color: #28a745;
+  background-color: #2188ff;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
+  padding: 0.3rem 0.75rem 0.3rem 0.75rem;
+  border-radius: 0.125rem;
 }
 
 .button-active:hover {
-  background-color: #218838;
+  background-color: #2188ff;
 }
 
 button:disabled {

@@ -1,3 +1,4 @@
+import { ArrowDownToDot, Camera, Shield } from "lucide-react";
 import { HTMLDivProps } from "../../types/html";
 import { Button } from "../button";
 import styles from "./styles.module.css";
@@ -10,9 +11,13 @@ export const TopBar: React.FC<ITopBar> = () => {
         <img src="./images/tractian.svg" alt="TRACTIAN" />
       </div>
       <div className={styles.buttonContainer}>
-        <Button name={"Apex Unit"} buttonStyle="SECONDARY" />
-        <Button name={"Tobias Unit"} />
-        <Button name={"Jaguar Unit"} />
+        <Button
+          name={"Apex Unit"}
+          buttonStyle="ACTIVE"
+          icon={<ArrowDownToDot />}
+        />
+        <Button name={"Tobias Unit"} buttonStyle="PRIMARY" icon={<Shield />} />
+        <Button name={"Jaguar Unit"} buttonStyle="PRIMARY" icon={<Shield />} />
       </div>
     </div>
   );
