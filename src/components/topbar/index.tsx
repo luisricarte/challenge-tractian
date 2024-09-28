@@ -1,4 +1,4 @@
-import { ArrowDownToDot, Camera, Shield } from "lucide-react";
+import { ArrowBigDown, Shield } from "lucide-react";
 import { HTMLDivProps } from "../../types/html";
 import { Button } from "../button";
 import styles from "./styles.module.css";
@@ -14,7 +14,7 @@ export const TopBar: React.FC<ITopBar> = () => {
         <Button
           name={"Apex Unit"}
           buttonStyle="ACTIVE"
-          icon={<ArrowDownToDot />}
+          icon={<ArrowBigDown />}
         />
         <Button name={"Tobias Unit"} buttonStyle="PRIMARY" icon={<Shield />} />
         <Button name={"Jaguar Unit"} buttonStyle="PRIMARY" icon={<Shield />} />

@@ -1,0 +1,18 @@
+.background {
+  display: flex;
+  flex-direction: column;
+  background-color: #e3eaef;
+  height: 100%;
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #ffffff;
+  margin: 1%;
+  border: 1px solid #d8dfe6;
+  border-radius: 0.25rem;
+}
