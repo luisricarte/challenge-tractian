@@ -1,11 +1,13 @@
 import React from "react";
+import "./styles/global.css";
+import { Route, Routes } from "react-router-dom";
+import { LandingPage } from "./pages/landing";
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <h1>teste</h1>
-    </div>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+    </Routes>
   );
-}
-
+};
 export default App;
