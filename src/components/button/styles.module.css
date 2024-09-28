@@ -15,12 +15,9 @@
   background-color: transparent;
   border: "1px solid #D8DFE6";
   padding: 0.3rem 0.75rem 0.3rem 0.75rem;
+  border: 1px solid #d8dfe6;
   border-radius: 0.125rem;
-  cursor: pointer;
-}
-
-.button-secondary:hover {
-  background-color: #5a6268;
+  color: #77818c;
 }
 
 .button-active {

@@ -1,4 +1,4 @@
-import React, { ReactChild } from "react";
+import React, { ReactNode } from "react";
 import { HTMLButtonProps } from "../../types/html";
 import styles from "./styles.module.css";
 
@@ -7,7 +7,7 @@ type ButtonTypes = "PRIMARY" | "SECONDARY" | "ACTIVE";
 interface IButton extends HTMLButtonProps {
   name: string;
   buttonStyle?: ButtonTypes;
-  icon?: ReactChild;
+  icon?: ReactNode;
 }
 
 export const Button: React.FC<IButton> = ({

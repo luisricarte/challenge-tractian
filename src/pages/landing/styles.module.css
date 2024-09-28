@@ -15,4 +15,23 @@
   margin: 1%;
   border: 1px solid #d8dfe6;
   border-radius: 0.25rem;
+  padding: 1rem;
+}
+
+.titleContainer {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.titleTextContainer {
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  gap: 0.5rem;
+}
+
+.titleButtonContainer {
+  display: flex;
+  gap: 1rem;
 }
