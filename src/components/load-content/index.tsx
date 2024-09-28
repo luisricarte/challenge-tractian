@@ -8,7 +8,6 @@ export const LoadContent = () => {
       style={{
         display: "flex",
         width: "100%",
-        border: "1px solid green",
         gap: "0.5rem",
       }}
     >

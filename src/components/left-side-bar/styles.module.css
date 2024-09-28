@@ -1,0 +1,27 @@
+.container {
+  border: 1px solid #d8dfe6;
+  width: 37.5%;
+  border-radius: 0.125rem;
+}
+
+.searchContainer {
+  display: flex;
+  border: 1px solid #d8dfe6;
+  padding: 1rem;
+  justify-content: space-between;
+  border-radius: 0.125rem;
+}
+
+input {
+  max-width: 100%;
+  border: 0;
+  width: 95%;
+  font-size: 1rem;
+  padding: 0.25rem;
+  flex-grow: 1;
+  font-size: 14px;
+  font-weight: 400;
+}
+input:focus {
+  outline: none;
+}
