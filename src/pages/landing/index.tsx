@@ -2,6 +2,7 @@ import React from "react";
 import { SideBar } from "../../components/side-bar";
 import { TopBar } from "../../components/topbar";
 import { Button } from "../../components/button";
+import style from "./styles.module.css";
 
 export const LandingPage: React.FC = () => {
   return (

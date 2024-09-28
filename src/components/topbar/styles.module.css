@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  width: "100%";
+  justify-content: space-between;
+  background-color: #17192d;
+  height: 4rem;
+}
+
+.imageContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
