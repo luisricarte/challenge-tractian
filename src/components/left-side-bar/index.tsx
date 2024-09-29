@@ -5,55 +5,36 @@ import { useQuery } from "react-query";
 import { reactQueryKeys } from "../../constants/react-query-keys";
 import { companiesService } from "../../services/companies";
 import { Accordion } from "../accordion";
-import { ReactNode, useState } from "react";
-import { Assets, Locations } from "../../types/response";
+import { Assets, Locations, TreeNode } from "../../types/response";
+import { MenuItem } from "../menuItem";
 
 interface ILeftSideBar extends HTMLDivProps {}
-interface Node {
-  id: string;
-  name: string;
-  parentId: string | null;
-  children?: Node[];
-}
-
-//eu recebo location data do contexto!
 
 export const LeftSideBar: React.FC<ILeftSideBar> = () => {
-  const [tree, setTree] = useState<Node[]>([]);
-
-  const { data: assetsData, isLoading: assetsLoading } = useQuery({
-    queryKey: reactQueryKeys.queries.findAllAssets,
-    queryFn: () => {
-      if (locationData) {
-        companiesService
-          .findAllAssets("662fd0ee639069143a8fc387")
-          .then((data) => {
-            buildAssetsTree(tree);
-          });
-      }
-    },
-  });
-
   const { data: locationData, isLoading: locationLoading } = useQuery({
     queryKey: reactQueryKeys.queries.findAllLocation,
     queryFn: async () => {
-      return await companiesService
-        .findAllLocations("662fd0ee639069143a8fc387")
-        .then((data) => buildLocation(data));
+      const data = await companiesService.findAllLocations(
+        "662fd0ee639069143a8fc387"
+      );
+      return buildLocationTree(data);
     },
   });
 
-  if (!locationLoading) {
-    console.log("location data", locationData);
-  }
+  const { data: finalData, isLoading: assetsLoading } = useQuery({
+    queryKey: reactQueryKeys.queries.findAllAssets,
+    queryFn: async () => {
+      const data = await companiesService.findAllAssets(
+        "662fd0ee639069143a8fc387"
+      );
+      if (locationData) return buildAssetsTree(locationData, data);
+    },
+    enabled: !!locationData,
+  });
 
-  const buildAssetsTree = (data: Assets[]) => {
-    const starterTree = tree;
-  };
-
-  const buildLocation = (data: Locations[]): Node[] => {
-    const nodes: { [key: string]: Node } = {};
-    const buildingTree = [] as Node[];
+  const buildLocationTree = (data: Locations[]): TreeNode[] => {
+    const nodes: { [key: string]: TreeNode } = {};
+    const buildingTree = [] as TreeNode[];
 
     data.forEach((item) => {
       nodes[item.id] = { ...item, children: [] };
@@ -69,8 +50,79 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
         }
       }
     });
-
     return buildingTree;
+  };
+
+  const buildAssetsTree = (locationsTree: TreeNode[], assetsData: Assets[]) => {
+    const assets: { [key: string]: TreeNode } = {};
+
+    assetsData.forEach((item, i) => {
+      if (assetsData[i].sensorType != null) {
+        assets[item.id] = { ...item, children: [] };
+      }
+      assets[item.id] = { ...item, children: [] };
+    });
+
+    assetsData.forEach((item, i) => {
+      if (item.sensorType != null) {
+        if (item.locationId === null && item.parentId === null) {
+          console.log("adicionei");
+          locationsTree.push(assets[item.id]);
+        } else if (item.locationId != null) {
+          console.log("adicionei1");
+          const parentLocation = findNodeById(locationsTree, item.locationId);
+          parentLocation?.children?.push(assets[item.id]);
+        } else if (item.parentId != null) {
+          console.log("adicionei1");
+          const parentAsset = assets[item.parentId];
+          parentAsset?.children?.push(assets[item.id]);
+        }
+      } else {
+        if (item.locationId != null) {
+          const parentLocation = findNodeById(locationsTree, item.locationId);
+          parentLocation?.children?.push(assets[item.id]);
+        } else if (item.parentId != null) {
+          const parentAsset = assets[item.parentId];
+          parentAsset?.children?.push(assets[item.id]);
+        }
+      }
+    });
+
+    console.log("locations tree final", locationsTree);
+    return locationsTree;
+  };
+
+  function findNodeById(tree: TreeNode[], id: string): TreeNode | undefined {
+    for (const node of tree) {
+      if (node.id === id) {
+        return node;
+      }
+      if (node.children) {
+        const found = findNodeById(node.children, id);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  }
+
+  const renderMenuItems = (arvore: TreeNode[]) => {
+    return arvore.map((item, index) => {
+      return item.sensorType != null ? (
+        <div style={{ paddingLeft: "3%", margin: "0.5rem" }}>
+          <MenuItem {...item} />
+        </div>
+      ) : (
+        <div style={{ paddingLeft: "3%" }}>
+          <Accordion
+            icon={<BaggageClaim />}
+            text={item.name}
+            key={`item-accordion-${index}-${item.id}`}
+          >
+            {item.children && renderMenuItems(item.children)}
+          </Accordion>
+        </div>
+      );
+    });
   };
 
   return (
@@ -85,17 +137,9 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
         />
         <Search size={18} />
       </div>
-      {locationData && assetsData ? "" : ""}
+
       <div style={{ display: "flex", flexDirection: "column", margin: "2%" }}>
-        <Accordion icon={<BaggageClaim />} text={"etste".toUpperCase()}>
-          <div style={{ marginLeft: "10%" }}>estou sendo exibido!</div>
-          <Accordion
-            icon={<BaggageClaim />}
-            text={"teste-interno".toUpperCase()}
-          >
-            exibido interno
-          </Accordion>
-        </Accordion>
+        {finalData ? <>{renderMenuItems(finalData)}</> : <>carregando</>}
       </div>
     </div>
   );

@@ -20,4 +20,11 @@ type Assets = {
   gatewayId?: string;
 };
 
-export type { Companies, Locations, Assets };
+interface TreeNode extends Assets {
+  id: string;
+  name: string;
+  parentId: string | null;
+  children?: TreeNode[];
+}
+
+export type { Companies, Locations, Assets, TreeNode };
