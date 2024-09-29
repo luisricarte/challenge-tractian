@@ -10,12 +10,12 @@ class CompaniesService {
 
   public async findAllLocations(companyId: string) {
     const response = await axios.get(`${api}/companies/${companyId}/locations`);
-    return response.data as Locations;
+    return response.data as Locations[];
   }
 
   public async findAllAssets(companyId: string) {
     const response = await axios.get(`${api}/companies/${companyId}/assets`);
-    return response.data as Assets;
+    return response.data as Assets[];
   }
 }
 
