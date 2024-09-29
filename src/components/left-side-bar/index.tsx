@@ -138,7 +138,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
         <Search size={18} />
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", margin: "2%" }}>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         {finalData ? <>{renderMenuItems(finalData)}</> : <>carregando</>}
       </div>
     </div>
