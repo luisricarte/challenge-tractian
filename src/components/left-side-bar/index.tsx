@@ -5,15 +5,19 @@ import { companiesService } from "../../services/companies";
 import { Accordion } from "../accordion";
 import { Assets, Locations, TreeNode } from "../../types/response";
 import { MenuItem } from "../menuItem";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 
 interface ILeftSideBar extends HTMLDivProps {}
 
 export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   const [locationData, setLocationData] = useState<TreeNode[] | null>(null);
+  const [loadingLocations, setLoadingLocations] = useState<boolean>(true);
+
   const [finalData, setFinalData] = useState<TreeNode[] | null>(null);
-  const [loadingLocations, setLoadingLocations] = useState(true);
-  const [loadingAssets, setLoadingAssets] = useState(false);
+  const [loadingAssets, setLoadingAssets] = useState<boolean>(false);
+
+  const [filteredData, setFilteredData] = useState<TreeNode[] | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -35,6 +39,12 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   }, []);
 
   useEffect(() => {
+    finalData && searchTerm
+      ? setFilteredData(filterTree(finalData, searchTerm))
+      : setFilteredData(finalData);
+  }, [searchTerm, finalData]);
+
+  useEffect(() => {
     const fetchAssets = async () => {
       if (!locationData) return;
 
@@ -44,6 +54,8 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
           "662fd0ee639069143a8fc387"
         );
         const treeWithAssets = buildAssetsTree(locationData, assetsData);
+
+        setFilteredData(treeWithAssets);
         setFinalData(treeWithAssets);
       } catch (error) {
         console.error("Erro ao buscar assets", error);
@@ -78,7 +90,6 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
 
   const buildAssetsTree = (locationsTree: TreeNode[], assetsData: Assets[]) => {
     const assets: { [key: string]: TreeNode } = {};
-    const clonedTree = [...locationsTree];
 
     assetsData.forEach((item) => {
       assets[item.id] = { ...item, children: [] };
@@ -87,9 +98,9 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     assetsData.forEach((item) => {
       if (item.sensorType != null) {
         if (item.locationId === null && item.parentId === null) {
-          clonedTree.push(assets[item.id]);
+          locationsTree.push(assets[item.id]);
         } else if (item.locationId != null) {
-          const parentLocation = findNodeById(clonedTree, item.locationId);
+          const parentLocation = findNodeById(locationsTree, item.locationId);
           parentLocation?.children?.push(assets[item.id]);
         } else if (item.parentId != null) {
           const parentAsset = assets[item.parentId];
@@ -97,7 +108,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
         }
       } else {
         if (item.locationId != null) {
-          const parentLocation = findNodeById(clonedTree, item.locationId);
+          const parentLocation = findNodeById(locationsTree, item.locationId);
           parentLocation?.children?.push(assets[item.id]);
         } else if (item.parentId != null) {
           const parentAsset = assets[item.parentId];
@@ -106,7 +117,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
       }
     });
 
-    return clonedTree;
+    return locationsTree;
   };
 
   const findNodeById = (tree: TreeNode[], id: string): TreeNode | undefined => {
@@ -120,16 +131,30 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     return undefined;
   };
 
+  const filterTree = useCallback(
+    (tree: TreeNode[], term: string): TreeNode[] => {
+      return tree
+        .map((node) => {
+          if (node.name.toLowerCase().includes(term.toLowerCase())) {
+            return node;
+          }
+          if (node.children) {
+            const filteredChildren = filterTree(node.children, term);
+            if (filteredChildren.length > 0) {
+              return { ...node, children: filteredChildren };
+            }
+          }
+          return null;
+        })
+        .filter((node) => node !== null) as TreeNode[];
+    },
+    []
+  );
+
   const renderMenuItems = (arvore: TreeNode[]) => {
     return arvore.map((item, index) => {
       return item.sensorType != null ? (
-        <div
-          style={{
-            paddingLeft: "3%",
-            margin: "0.5rem",
-          }}
-          key={item.id}
-        >
+        <div style={{ paddingLeft: "3%", margin: "0.5rem" }} key={item.id}>
           <MenuItem {...item} />
         </div>
       ) : (
@@ -147,8 +172,8 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   };
 
   const menuItems = useMemo(() => {
-    return finalData ? renderMenuItems(finalData) : null;
-  }, [finalData]);
+    return filteredData && renderMenuItems(filteredData);
+  }, [filteredData]);
 
   return (
     <div className={style.container}>
@@ -157,9 +182,8 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
           id="search-bar"
           placeholder="Buscar ativo ou Local"
           style={{ fontSize: "18px" }}
-          onChange={(e) => {
-            console.log(e.target.value);
-          }}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Search size={18} />
       </div>
