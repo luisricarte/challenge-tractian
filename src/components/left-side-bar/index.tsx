@@ -15,6 +15,46 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   const [loadingLocations, setLoadingLocations] = useState(true);
   const [loadingAssets, setLoadingAssets] = useState(false);
 
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setLoadingLocations(true);
+        const data = await companiesService.findAllLocations(
+          "662fd0ee639069143a8fc387"
+        );
+        const tree = buildLocationTree(data);
+        setLocationData(tree);
+      } catch (error) {
+        console.error("Erro ao buscar localizações", error);
+      } finally {
+        setLoadingLocations(false);
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
+  useEffect(() => {
+    const fetchAssets = async () => {
+      if (!locationData) return;
+
+      try {
+        setLoadingAssets(true);
+        const assetsData = await companiesService.findAllAssets(
+          "662fd0ee639069143a8fc387"
+        );
+        const treeWithAssets = buildAssetsTree(locationData, assetsData);
+        setFinalData(treeWithAssets);
+      } catch (error) {
+        console.error("Erro ao buscar assets", error);
+      } finally {
+        setLoadingAssets(false);
+      }
+    };
+
+    fetchAssets();
+  }, [locationData]);
+
   const buildLocationTree = (data: Locations[]): TreeNode[] => {
     const nodes: { [key: string]: TreeNode } = {};
     const buildingTree = [] as TreeNode[];
@@ -79,46 +119,6 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     }
     return undefined;
   };
-
-  useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        setLoadingLocations(true);
-        const data = await companiesService.findAllLocations(
-          "662fd0ee639069143a8fc387"
-        );
-        const tree = buildLocationTree(data);
-        setLocationData(tree);
-      } catch (error) {
-        console.error("Erro ao buscar localizações", error);
-      } finally {
-        setLoadingLocations(false);
-      }
-    };
-
-    fetchLocations();
-  }, []);
-
-  useEffect(() => {
-    const fetchAssets = async () => {
-      if (!locationData) return;
-
-      try {
-        setLoadingAssets(true);
-        const assetsData = await companiesService.findAllAssets(
-          "662fd0ee639069143a8fc387"
-        );
-        const treeWithAssets = buildAssetsTree(locationData, assetsData);
-        setFinalData(treeWithAssets);
-      } catch (error) {
-        console.error("Erro ao buscar assets", error);
-      } finally {
-        setLoadingAssets(false);
-      }
-    };
-
-    fetchAssets();
-  }, [locationData]);
 
   const renderMenuItems = (arvore: TreeNode[]) => {
     return arvore.map((item, index) => {
