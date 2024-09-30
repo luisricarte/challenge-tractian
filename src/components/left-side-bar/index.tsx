@@ -7,11 +7,12 @@ import { companiesService } from "../../services/companies";
 import { Accordion } from "../accordion";
 import { Assets, Locations, TreeNode } from "../../types/response";
 import { MenuItem } from "../menuItem";
+import { useMemo } from "react";
 
 interface ILeftSideBar extends HTMLDivProps {}
 
 export const LeftSideBar: React.FC<ILeftSideBar> = () => {
-  const { data: locationData, isLoading: locationLoading } = useQuery({
+  const { data: locationData } = useQuery({
     queryKey: reactQueryKeys.queries.findAllLocation,
     queryFn: async () => {
       const data = await companiesService.findAllLocations(
@@ -21,7 +22,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     },
   });
 
-  const { data: finalData, isLoading: assetsLoading } = useQuery({
+  const { data: finalData } = useQuery({
     queryKey: reactQueryKeys.queries.findAllAssets,
     queryFn: async () => {
       const data = await companiesService.findAllAssets(
@@ -31,6 +32,30 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     },
     enabled: !!locationData,
   });
+
+  const renderMenuItems = (arvore: TreeNode[]) => {
+    return arvore.map((item, index) => {
+      return item.sensorType != null ? (
+        <div style={{ paddingLeft: "3%", margin: "0.25rem" }}>
+          <MenuItem {...item} />
+        </div>
+      ) : (
+        <div style={{ paddingLeft: "3%" }}>
+          <Accordion
+            icon={<BaggageClaim />}
+            text={item.name}
+            key={`item-accordion-${index}-${item.id}`}
+          >
+            {item.children && renderMenuItems(item.children)}
+          </Accordion>
+        </div>
+      );
+    });
+  };
+
+  const menuItems = useMemo(() => {
+    return finalData ? renderMenuItems(finalData) : null;
+  }, [finalData]);
 
   const buildLocationTree = (data: Locations[]): TreeNode[] => {
     const nodes: { [key: string]: TreeNode } = {};
@@ -56,30 +81,28 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   const buildAssetsTree = (locationsTree: TreeNode[], assetsData: Assets[]) => {
     const assets: { [key: string]: TreeNode } = {};
 
+    const clonedTree = [...locationsTree];
+
     assetsData.forEach((item, i) => {
       if (assetsData[i].sensorType != null) {
         assets[item.id] = { ...item, children: [] };
       }
       assets[item.id] = { ...item, children: [] };
     });
-
-    assetsData.forEach((item, i) => {
+    assetsData.forEach((item) => {
       if (item.sensorType != null) {
         if (item.locationId === null && item.parentId === null) {
-          console.log("adicionei");
-          locationsTree.push(assets[item.id]);
+          clonedTree.push(assets[item.id]);
         } else if (item.locationId != null) {
-          console.log("adicionei1");
-          const parentLocation = findNodeById(locationsTree, item.locationId);
+          const parentLocation = findNodeById(clonedTree, item.locationId);
           parentLocation?.children?.push(assets[item.id]);
         } else if (item.parentId != null) {
-          console.log("adicionei1");
           const parentAsset = assets[item.parentId];
           parentAsset?.children?.push(assets[item.id]);
         }
       } else {
         if (item.locationId != null) {
-          const parentLocation = findNodeById(locationsTree, item.locationId);
+          const parentLocation = findNodeById(clonedTree, item.locationId);
           parentLocation?.children?.push(assets[item.id]);
         } else if (item.parentId != null) {
           const parentAsset = assets[item.parentId];
@@ -88,41 +111,18 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
       }
     });
 
-    console.log("locations tree final", locationsTree);
-    return locationsTree;
+    return clonedTree;
   };
 
-  function findNodeById(tree: TreeNode[], id: string): TreeNode | undefined {
+  const findNodeById = (tree: TreeNode[], id: string): TreeNode | undefined => {
     for (const node of tree) {
       if (node.id === id) {
         return node;
       }
-      if (node.children) {
-        const found = findNodeById(node.children, id);
-        if (found) return found;
-      }
+      const found = node.children && findNodeById(node.children, id);
+      if (found) return found;
     }
     return undefined;
-  }
-
-  const renderMenuItems = (arvore: TreeNode[]) => {
-    return arvore.map((item, index) => {
-      return item.sensorType != null ? (
-        <div style={{ paddingLeft: "3%", margin: "0.5rem" }}>
-          <MenuItem {...item} />
-        </div>
-      ) : (
-        <div style={{ paddingLeft: "3%" }}>
-          <Accordion
-            icon={<BaggageClaim />}
-            text={item.name}
-            key={`item-accordion-${index}-${item.id}`}
-          >
-            {item.children && renderMenuItems(item.children)}
-          </Accordion>
-        </div>
-      );
-    });
   };
 
   return (
@@ -139,7 +139,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {finalData ? <>{renderMenuItems(finalData)}</> : <>carregando</>}
+        {finalData ? menuItems : <>carregando</>}
       </div>
     </div>
   );

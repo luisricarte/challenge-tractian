@@ -4,7 +4,7 @@ import styles from "./styles.module.css";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 type AccordionProps = {
-  icon: ReactNode;
+  icon: ReactNode | string;
   text: string;
   children?: ReactNode;
 };
