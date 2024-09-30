@@ -5,15 +5,18 @@ import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ActiveAssetProvider } from "./contexts/ActiveAssetContext";
+import { FilterSensorProvider } from "./contexts/FilterSensorContext";
 
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <QueryClientProvider client={queryClient}>
-      <ActiveAssetProvider>
-        <App />
-      </ActiveAssetProvider>
+      <FilterSensorProvider>
+        <ActiveAssetProvider>
+          <App />
+        </ActiveAssetProvider>
+      </FilterSensorProvider>
     </QueryClientProvider>
   </BrowserRouter>
 );

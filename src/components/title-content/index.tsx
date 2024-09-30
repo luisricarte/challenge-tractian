@@ -1,9 +1,47 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "./style.module.css";
 import { Button } from "../button";
 import { CircleAlert, Zap } from "lucide-react";
+import { useFilterSensorContext } from "../../contexts/FilterSensorContext";
 
 export const TitleContent = () => {
+  const { sensorType, setSensorType } = useFilterSensorContext();
+
+  useEffect(() => {
+    renderButtons();
+  }, [sensorType]);
+
+  const renderButtons = () => {
+    return (
+      <>
+        <Button
+          name={"Sensor de Energia"}
+          buttonStyle={sensorType === "energy" ? "ACTIVE" : "SECONDARY"}
+          icon={<Zap color={sensorType === "energy" ? "#fff" : "#2188FF"} />}
+          onClick={() => {
+            sensorType === "energy"
+              ? setSensorType(null)
+              : setSensorType("energy");
+          }}
+        />
+        <Button
+          name={"Crítico"}
+          buttonStyle={sensorType === "vibration" ? "ACTIVE" : "SECONDARY"}
+          icon={
+            <CircleAlert
+              color={sensorType === "vibration" ? "#fff" : "#2188FF"}
+            />
+          }
+          onClick={() => {
+            sensorType === "vibration"
+              ? setSensorType(null)
+              : setSensorType("vibration");
+          }}
+        />
+      </>
+    );
+  };
+
   return (
     <div className={styles.titleContainer}>
       <div className={styles.titleTextContainer}>
@@ -15,18 +53,7 @@ export const TitleContent = () => {
         </span>
       </div>
 
-      <div className={styles.titleButtonContainer}>
-        <Button
-          name={"Sensor de Energia"}
-          buttonStyle="SECONDARY"
-          icon={<Zap color="#2188FF" />}
-        />
-        <Button
-          name={"Crítico"}
-          buttonStyle="SECONDARY"
-          icon={<CircleAlert color="#2188FF" />}
-        />
-      </div>
+      <div className={styles.titleButtonContainer}>{renderButtons()}</div>
     </div>
   );
 };

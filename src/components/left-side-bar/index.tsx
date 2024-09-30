@@ -6,6 +6,7 @@ import { Accordion } from "../accordion";
 import { Assets, Locations, TreeNode } from "../../types/response";
 import { MenuItem } from "../menuItem";
 import { useState, useEffect, useMemo } from "react";
+import { useFilterSensorContext } from "../../contexts/FilterSensorContext";
 
 interface ILeftSideBar extends HTMLDivProps {}
 
@@ -13,6 +14,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   const [finalData, setFinalData] = useState<TreeNode[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const { sensorType } = useFilterSensorContext();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,6 +125,8 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     if (!finalData) return null;
     return searchTerm ? filterTree(finalData, searchTerm) : finalData;
   }, [searchTerm, finalData]);
+
+  console.log("useFilterContext", sensorType);
 
   const renderMenuItems = (arvore: TreeNode[]) => {
     return arvore.map((item, index) => {

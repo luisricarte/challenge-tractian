@@ -23,7 +23,7 @@
 .button-active {
   background-color: #2188ff;
   color: white;
-  border: none;
+  border: 1px solid #2188ff;
   padding: 0.3rem 0.75rem 0.3rem 0.75rem;
   border-radius: 0.125rem;
 }

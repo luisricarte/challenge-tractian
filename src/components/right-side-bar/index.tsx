@@ -6,12 +6,12 @@ import { Inbox } from "lucide-react";
 interface IRightSideBar extends HTMLDivProps {}
 
 export const RightSideBar: React.FC<IRightSideBar> = () => {
-  const { name, sensorType, gateway, status } = useActiveAssetContext();
+  const { name, sensorType, status } = useActiveAssetContext();
 
   return (
     <div className={style.container}>
       <div className={style.titleContainer}>
-        <strong className={style.title}>MOTOR RT COAL AF01</strong>
+        <strong className={style.title}>{name}</strong>
       </div>
 
       <div className={style.contextContainer}>
@@ -23,12 +23,12 @@ export const RightSideBar: React.FC<IRightSideBar> = () => {
           <div className={style.typeRespContainer}>
             <div className={style.itemContainer}>
               <strong>Tipo de Equipamento</strong>
-              <span>Motor Elétrico (Trifásico) </span>
+              <span>{sensorType}</span>
             </div>
             <div className={style.divider}></div>
             <div className={style.itemContainer}>
               <strong>Responsáveis</strong>
-              <span>Mecânica</span>
+              <span>{status}</span>
             </div>
           </div>
         </div>
@@ -36,26 +36,3 @@ export const RightSideBar: React.FC<IRightSideBar> = () => {
     </div>
   );
 };
-
-{
-  /* <div
-style={{
-  width: "100%",
-  height: "1px",
-  backgroundColor: "#E3EAEF",
-}}
-></div> */
-}
-
-{
-  /* <div id="sensor-receptor">
-          <div id="sensor">
-            <strong>Sensor</strong>
-            <span>H123141</span>
-          </div>
-          <div id="receptor">
-            <strong>Receptor</strong>
-            <span>{gateway}</span>
-          </div>
-        </div> */
-}
