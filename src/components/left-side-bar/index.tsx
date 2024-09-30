@@ -1,4 +1,4 @@
-import { BaggageClaim, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { HTMLDivProps } from "../../types/html";
 import style from "./styles.module.css";
 import { useQuery } from "react-query";
@@ -36,13 +36,13 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   const renderMenuItems = (arvore: TreeNode[]) => {
     return arvore.map((item, index) => {
       return item.sensorType != null ? (
-        <div style={{ paddingLeft: "3%", margin: "0.25rem" }}>
+        <div style={{ paddingLeft: "3%", margin: "0.5rem" }}>
           <MenuItem {...item} />
         </div>
       ) : (
         <div style={{ paddingLeft: "3%" }}>
           <Accordion
-            icon={<BaggageClaim />}
+            icon={item.nodeType === "location" ? "location" : "asset"}
             text={item.name}
             key={`item-accordion-${index}-${item.id}`}
           >
@@ -62,7 +62,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     const buildingTree = [] as TreeNode[];
 
     data.forEach((item) => {
-      nodes[item.id] = { ...item, children: [] };
+      nodes[item.id] = { ...item, children: [], nodeType: "location" };
     });
 
     data.forEach((item) => {
@@ -131,6 +131,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
         <input
           id="search-bar"
           placeholder="Buscar ativo ou Local"
+          style={{ fontSize: "18px" }}
           onChange={(e) => {
             console.log(e.target.value);
           }}

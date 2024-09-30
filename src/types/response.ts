@@ -25,6 +25,7 @@ interface TreeNode extends Assets {
   name: string;
   parentId: string | null;
   children?: TreeNode[];
+  nodeType?: "location" | "asset";
 }
 
 export type { Companies, Locations, Assets, TreeNode };
