@@ -1,61 +1,19 @@
 import { Search } from "lucide-react";
 import { HTMLDivProps } from "../../types/html";
 import style from "./styles.module.css";
-import { useQuery } from "react-query";
-import { reactQueryKeys } from "../../constants/react-query-keys";
 import { companiesService } from "../../services/companies";
 import { Accordion } from "../accordion";
 import { Assets, Locations, TreeNode } from "../../types/response";
 import { MenuItem } from "../menuItem";
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface ILeftSideBar extends HTMLDivProps {}
 
 export const LeftSideBar: React.FC<ILeftSideBar> = () => {
-  const { data: locationData } = useQuery({
-    queryKey: reactQueryKeys.queries.findAllLocation,
-    queryFn: async () => {
-      const data = await companiesService.findAllLocations(
-        "662fd0ee639069143a8fc387"
-      );
-      return buildLocationTree(data);
-    },
-  });
-
-  const { data: finalData } = useQuery({
-    queryKey: reactQueryKeys.queries.findAllAssets,
-    queryFn: async () => {
-      const data = await companiesService.findAllAssets(
-        "662fd0ee639069143a8fc387"
-      );
-      if (locationData) return buildAssetsTree(locationData, data);
-    },
-    enabled: !!locationData,
-  });
-
-  const renderMenuItems = (arvore: TreeNode[]) => {
-    return arvore.map((item, index) => {
-      return item.sensorType != null ? (
-        <div style={{ paddingLeft: "3%", margin: "0.5rem" }}>
-          <MenuItem {...item} />
-        </div>
-      ) : (
-        <div style={{ paddingLeft: "3%" }}>
-          <Accordion
-            icon={item.nodeType === "location" ? "location" : "asset"}
-            text={item.name}
-            key={`item-accordion-${index}-${item.id}`}
-          >
-            {item.children && renderMenuItems(item.children)}
-          </Accordion>
-        </div>
-      );
-    });
-  };
-
-  const menuItems = useMemo(() => {
-    return finalData ? renderMenuItems(finalData) : null;
-  }, [finalData]);
+  const [locationData, setLocationData] = useState<TreeNode[] | null>(null);
+  const [finalData, setFinalData] = useState<TreeNode[] | null>(null);
+  const [loadingLocations, setLoadingLocations] = useState(true);
+  const [loadingAssets, setLoadingAssets] = useState(false);
 
   const buildLocationTree = (data: Locations[]): TreeNode[] => {
     const nodes: { [key: string]: TreeNode } = {};
@@ -80,15 +38,12 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
 
   const buildAssetsTree = (locationsTree: TreeNode[], assetsData: Assets[]) => {
     const assets: { [key: string]: TreeNode } = {};
-
     const clonedTree = [...locationsTree];
 
-    assetsData.forEach((item, i) => {
-      if (assetsData[i].sensorType != null) {
-        assets[item.id] = { ...item, children: [] };
-      }
+    assetsData.forEach((item) => {
       assets[item.id] = { ...item, children: [] };
     });
+
     assetsData.forEach((item) => {
       if (item.sensorType != null) {
         if (item.locationId === null && item.parentId === null) {
@@ -125,6 +80,76 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     return undefined;
   };
 
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setLoadingLocations(true);
+        const data = await companiesService.findAllLocations(
+          "662fd0ee639069143a8fc387"
+        );
+        const tree = buildLocationTree(data);
+        setLocationData(tree);
+      } catch (error) {
+        console.error("Erro ao buscar localizações", error);
+      } finally {
+        setLoadingLocations(false);
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
+  useEffect(() => {
+    const fetchAssets = async () => {
+      if (!locationData) return;
+
+      try {
+        setLoadingAssets(true);
+        const assetsData = await companiesService.findAllAssets(
+          "662fd0ee639069143a8fc387"
+        );
+        const treeWithAssets = buildAssetsTree(locationData, assetsData);
+        setFinalData(treeWithAssets);
+      } catch (error) {
+        console.error("Erro ao buscar assets", error);
+      } finally {
+        setLoadingAssets(false);
+      }
+    };
+
+    fetchAssets();
+  }, [locationData]);
+
+  const renderMenuItems = (arvore: TreeNode[]) => {
+    return arvore.map((item, index) => {
+      return item.sensorType != null ? (
+        <div
+          style={{
+            paddingLeft: "3%",
+            margin: "0.5rem",
+          }}
+          key={item.id}
+        >
+          <MenuItem {...item} />
+        </div>
+      ) : (
+        <div style={{ paddingLeft: "3%" }} key={item.id}>
+          <Accordion
+            icon={item.nodeType === "location" ? "location" : "asset"}
+            text={item.name}
+            key={`item-accordion-${index}-${item.id}`}
+          >
+            {item.children && renderMenuItems(item.children)}
+          </Accordion>
+        </div>
+      );
+    });
+  };
+
+  const menuItems = useMemo(() => {
+    return finalData ? renderMenuItems(finalData) : null;
+  }, [finalData]);
+
   return (
     <div className={style.container}>
       <div className={style.searchContainer}>
@@ -140,7 +165,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {finalData ? menuItems : <>carregando</>}
+        {loadingLocations || loadingAssets ? <>carregando</> : menuItems}
       </div>
     </div>
   );

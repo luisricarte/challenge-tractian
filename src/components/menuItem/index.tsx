@@ -8,7 +8,7 @@ export const MenuItem: React.FC<TreeNode> = (item) => {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "4px",
+        gap: "8px",
       }}
     >
       <img src="./images/component.svg " alt="Component" />
