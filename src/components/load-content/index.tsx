@@ -9,6 +9,8 @@ export const LoadContent = () => {
         display: "flex",
         width: "100%",
         gap: "0.5rem",
+        paddingTop: "1rem",
+        height: "700px",
       }}
     >
       <LeftSideBar />
