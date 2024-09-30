@@ -5,67 +5,38 @@ import { companiesService } from "../../services/companies";
 import { Accordion } from "../accordion";
 import { Assets, Locations, TreeNode } from "../../types/response";
 import { MenuItem } from "../menuItem";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface ILeftSideBar extends HTMLDivProps {}
 
 export const LeftSideBar: React.FC<ILeftSideBar> = () => {
-  const [locationData, setLocationData] = useState<TreeNode[] | null>(null);
-  const [loadingLocations, setLoadingLocations] = useState<boolean>(true);
-
   const [finalData, setFinalData] = useState<TreeNode[] | null>(null);
-  const [loadingAssets, setLoadingAssets] = useState<boolean>(false);
-
-  const [filteredData, setFilteredData] = useState<TreeNode[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
-    const fetchLocations = async () => {
+    const fetchData = async () => {
       try {
-        setLoadingLocations(true);
-        const data = await companiesService.findAllLocations(
-          "662fd0ee639069143a8fc387"
-        );
-        const tree = buildLocationTree(data);
-        setLocationData(tree);
-      } catch (error) {
-        console.error("Erro ao buscar localizações", error);
-      } finally {
-        setLoadingLocations(false);
-      }
-    };
+        setLoading(true);
 
-    fetchLocations();
-  }, []);
+        const [locationsData, assetsData] = await Promise.all([
+          companiesService.findAllLocations("662fd0ee639069143a8fc387"),
+          companiesService.findAllAssets("662fd0ee639069143a8fc387"),
+        ]);
 
-  useEffect(() => {
-    finalData && searchTerm
-      ? setFilteredData(filterTree(finalData, searchTerm))
-      : setFilteredData(finalData);
-  }, [searchTerm, finalData]);
+        const tree = buildLocationTree(locationsData);
+        const treeWithAssets = buildAssetsTree(tree, assetsData);
 
-  useEffect(() => {
-    const fetchAssets = async () => {
-      if (!locationData) return;
-
-      try {
-        setLoadingAssets(true);
-        const assetsData = await companiesService.findAllAssets(
-          "662fd0ee639069143a8fc387"
-        );
-        const treeWithAssets = buildAssetsTree(locationData, assetsData);
-
-        setFilteredData(treeWithAssets);
         setFinalData(treeWithAssets);
       } catch (error) {
-        console.error("Erro ao buscar assets", error);
+        console.error("Erro ao buscar dados", error);
       } finally {
-        setLoadingAssets(false);
+        setLoading(false);
       }
     };
 
-    fetchAssets();
-  }, [locationData]);
+    fetchData();
+  }, []);
 
   const buildLocationTree = (data: Locations[]): TreeNode[] => {
     const nodes: { [key: string]: TreeNode } = {};
@@ -131,25 +102,27 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     return undefined;
   };
 
-  const filterTree = useCallback(
-    (tree: TreeNode[], term: string): TreeNode[] => {
-      return tree
-        .map((node) => {
-          if (node.name.toLowerCase().includes(term.toLowerCase())) {
-            return node;
+  const filterTree = (tree: TreeNode[], term: string): TreeNode[] => {
+    return tree
+      .map((node) => {
+        if (node.name.toLowerCase().includes(term.toLowerCase())) {
+          return node;
+        }
+        if (node.children) {
+          const filteredChildren = filterTree(node.children, term);
+          if (filteredChildren.length > 0) {
+            return { ...node, children: filteredChildren };
           }
-          if (node.children) {
-            const filteredChildren = filterTree(node.children, term);
-            if (filteredChildren.length > 0) {
-              return { ...node, children: filteredChildren };
-            }
-          }
-          return null;
-        })
-        .filter((node) => node !== null) as TreeNode[];
-    },
-    []
-  );
+        }
+        return null;
+      })
+      .filter((node) => node !== null) as TreeNode[];
+  };
+
+  const filteredData = useMemo(() => {
+    if (!finalData) return null;
+    return searchTerm ? filterTree(finalData, searchTerm) : finalData;
+  }, [searchTerm, finalData]);
 
   const renderMenuItems = (arvore: TreeNode[]) => {
     return arvore.map((item, index) => {
@@ -171,10 +144,6 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     });
   };
 
-  const menuItems = useMemo(() => {
-    return filteredData && renderMenuItems(filteredData);
-  }, [filteredData]);
-
   return (
     <div className={style.container}>
       <div className={style.searchContainer}>
@@ -189,7 +158,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {loadingLocations || loadingAssets ? <>carregando</> : menuItems}
+        {loading ? <>carregando</> : renderMenuItems(filteredData!)}
       </div>
     </div>
   );
