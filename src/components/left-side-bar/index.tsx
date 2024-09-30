@@ -158,7 +158,11 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {loading ? <>carregando</> : renderMenuItems(filteredData!)}
+        {loading ? (
+          <>carregando</>
+        ) : (
+          filteredData && renderMenuItems(filteredData)
+        )}
       </div>
     </div>
   );
