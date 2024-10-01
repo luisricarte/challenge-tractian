@@ -10,15 +10,16 @@ import { useFilterSensorContext } from "../../contexts/FilterSensorContext";
 import { useQuery } from "react-query";
 import { reactQueryKeys } from "../../constants/react-query-keys";
 import { useCompanyContext } from "../../contexts/CompanyContext";
+import { useFilterStatusContext } from "../../contexts/FilterStatusContext";
 
 interface ILeftSideBar extends HTMLDivProps {}
 
 export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const { sensorType } = useFilterSensorContext();
+  const { status } = useFilterStatusContext();
   const { companyId } = useCompanyContext();
 
-  console.log("companyid atual", companyId);
   const buildLocationTree = (data: Locations[]): TreeNode[] => {
     const nodes: { [key: string]: TreeNode } = {};
     const buildingTree = [] as TreeNode[];
@@ -106,7 +107,8 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   const filterTree = (
     tree: TreeNode[],
     term: string,
-    sensorType: string | null
+    sensorType: string | null,
+    status: string | null
   ): TreeNode[] => {
     return tree
       .map((node) => {
@@ -118,12 +120,20 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
           sensorType === null ||
           (node.sensorType && node.sensorType === sensorType);
 
-        if (matchesTerm && matchesSensorType) {
+        const matchesStatus =
+          status === null || (status === "alert" && node.status === "alert");
+
+        if (matchesTerm && matchesSensorType && matchesStatus) {
           return node;
         }
 
         if (node.children) {
-          const filteredChildren = filterTree(node.children, term, sensorType);
+          const filteredChildren = filterTree(
+            node.children,
+            term,
+            sensorType,
+            status
+          );
           if (filteredChildren.length > 0) {
             return { ...node, children: filteredChildren };
           }
@@ -135,8 +145,8 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
 
   const filteredData = useMemo(() => {
     if (!finalData) return null;
-    return filterTree(finalData, searchTerm, sensorType);
-  }, [searchTerm, finalData, sensorType]);
+    return filterTree(finalData, searchTerm, sensorType, status);
+  }, [searchTerm, finalData, sensorType, status]);
 
   const isLoading = isLoadingLocations || isLoadingAssets;
 

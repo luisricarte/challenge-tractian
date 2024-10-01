@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ActiveAssetProvider } from "./contexts/ActiveAssetContext";
 import { FilterSensorProvider } from "./contexts/FilterSensorContext";
 import { CompanyProvider } from "./contexts/CompanyContext";
+import { FilterStatusProvider } from "./contexts/FilterStatusContext";
 
 const queryClient = new QueryClient();
 
@@ -15,9 +16,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <CompanyProvider>
         <FilterSensorProvider>
-          <ActiveAssetProvider>
-            <App />
-          </ActiveAssetProvider>
+          <FilterStatusProvider>
+            <ActiveAssetProvider>
+              <App />
+            </ActiveAssetProvider>
+          </FilterStatusProvider>
         </FilterSensorProvider>
       </CompanyProvider>
     </QueryClientProvider>

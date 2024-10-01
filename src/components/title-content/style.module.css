@@ -13,8 +13,6 @@
 
 .titleButtonContainer {
   display: flex;
-  flex-direction: column;
-
   justify-content: center;
   gap: 0.25rem;
   border: 2px dashed #d8dfe6;

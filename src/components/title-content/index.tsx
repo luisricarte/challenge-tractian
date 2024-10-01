@@ -1,17 +1,23 @@
 import React, { useEffect } from "react";
 import styles from "./style.module.css";
 import { Button } from "../button";
-import { Waves, Zap } from "lucide-react";
+import { AlertCircle, Waves, Zap } from "lucide-react";
 import { useFilterSensorContext } from "../../contexts/FilterSensorContext";
+import { useFilterStatusContext } from "../../contexts/FilterStatusContext";
 
 export const TitleContent = () => {
   const { sensorType, setSensorType } = useFilterSensorContext();
+  const { status, setStatus } = useFilterStatusContext();
 
   useEffect(() => {
-    renderButtons();
+    renderSensorFilterButtons();
   }, [sensorType]);
 
-  const renderButtons = () => {
+  useEffect(() => {
+    renderAlertButtons();
+  }, [status]);
+
+  const renderSensorFilterButtons = () => {
     return (
       <>
         <Button
@@ -40,6 +46,19 @@ export const TitleContent = () => {
     );
   };
 
+  const renderAlertButtons = () => {
+    return (
+      <Button
+        name={"Crítico"}
+        buttonStyle={status === "alert" ? "ACTIVE" : "SECONDARY"}
+        icon={<AlertCircle color={status === "alert" ? "#fff" : "#2188FF"} />}
+        onClick={() =>
+          status === "alert" ? setStatus(null) : setStatus("alert")
+        }
+      />
+    );
+  };
+
   return (
     <div className={styles.titleContainer}>
       <div className={styles.titleTextContainer}>
@@ -51,9 +70,15 @@ export const TitleContent = () => {
         </span>
       </div>
 
-      <div className={styles.titleButtonContainer}>
-        <strong style={{ color: "#77818C" }}>Filtro (sensor type)</strong>
-        {renderButtons()}
+      <div style={{ display: "flex", gap: "0.5rem" }}>
+        <div className={styles.titleButtonContainer}>
+          <strong style={{ color: "#77818C" }}>Filtro (sensor type)</strong>
+          {renderSensorFilterButtons()}
+        </div>
+        <div className={styles.titleButtonContainer}>
+          <strong style={{ color: "#77818C" }}>Filtro (status)</strong>
+          {renderAlertButtons()}
+        </div>
       </div>
     </div>
   );
