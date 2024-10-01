@@ -5,40 +5,17 @@ import { companiesService } from "../../services/companies";
 import { Accordion } from "../accordion";
 import { Assets, Locations, TreeNode } from "../../types/response";
 import { MenuItem } from "../menuItem";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useFilterSensorContext } from "../../contexts/FilterSensorContext";
+import { useQuery } from "react-query";
+import { reactQueryKeys } from "../../constants/react-query-keys";
 
 interface ILeftSideBar extends HTMLDivProps {}
 
 export const LeftSideBar: React.FC<ILeftSideBar> = () => {
-  const [finalData, setFinalData] = useState<TreeNode[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const { sensorType } = useFilterSensorContext();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-
-        const [locationsData, assetsData] = await Promise.all([
-          companiesService.findAllLocations("662fd0ee639069143a8fc387"),
-          companiesService.findAllAssets("662fd0ee639069143a8fc387"),
-        ]);
-
-        const tree = buildLocationTree(locationsData);
-        const treeWithAssets = buildAssetsTree(tree, assetsData);
-
-        setFinalData(treeWithAssets);
-      } catch (error) {
-        console.error("Erro ao buscar dados", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const companyId = "662fd0ee639069143a8fc387";
 
   const buildLocationTree = (data: Locations[]): TreeNode[] => {
     const nodes: { [key: string]: TreeNode } = {};
@@ -104,6 +81,25 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     return undefined;
   };
 
+  const { data: locationsData, isLoading: isLoadingLocations } = useQuery({
+    queryKey: [reactQueryKeys.queries.findAllLocation],
+    queryFn: () => companiesService.findAllLocations(companyId),
+  });
+
+  const { data: assetsData, isLoading: isLoadingAssets } = useQuery({
+    queryKey: [reactQueryKeys.queries.findAllAssets],
+    queryFn: () => companiesService.findAllAssets(companyId),
+    enabled: !!locationsData,
+  });
+
+  const finalData = useMemo(() => {
+    if (locationsData && assetsData) {
+      const tree = buildLocationTree(locationsData);
+      return buildAssetsTree(tree, assetsData);
+    }
+    return null;
+  }, [assetsData]);
+
   const filterTree = (tree: TreeNode[], term: string): TreeNode[] => {
     return tree
       .map((node) => {
@@ -126,8 +122,7 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     return searchTerm ? filterTree(finalData, searchTerm) : finalData;
   }, [searchTerm, finalData]);
 
-  console.log("useFilterContext", sensorType);
-
+  const isLoading = isLoadingLocations || isLoadingAssets;
   const renderMenuItems = (arvore: TreeNode[]) => {
     return arvore.map((item, index) => {
       return item.sensorType != null ? (
@@ -162,8 +157,8 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {loading ? (
-          <>carregando</>
+        {isLoading ? (
+          <>Carregando...</>
         ) : (
           filteredData && renderMenuItems(filteredData)
         )}
