@@ -18,6 +18,7 @@
   border: 1px solid #d8dfe6;
   border-radius: 0.125rem;
   color: #77818c;
+  cursor: pointer;
 }
 
 .button-active {

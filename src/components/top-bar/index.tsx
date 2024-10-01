@@ -19,7 +19,7 @@ export const TopBar: React.FC<ITopBar> = () => {
           buttonStyle={
             companyId === "662fd100f990557384756e58" ? "ACTIVE" : "PRIMARY"
           }
-          icon={<ArrowBigDown />}
+          icon={<Shield />}
           onClick={() => {
             setCompanyId("662fd100f990557384756e58");
           }}

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import styles from "./style.module.css";
 import { Button } from "../button";
-import { CircleAlert, Zap } from "lucide-react";
+import { Waves, Zap } from "lucide-react";
 import { useFilterSensorContext } from "../../contexts/FilterSensorContext";
 
 export const TitleContent = () => {
@@ -25,12 +25,10 @@ export const TitleContent = () => {
           }}
         />
         <Button
-          name={"Crítico"}
+          name={"Sensor de Vibração"}
           buttonStyle={sensorType === "vibration" ? "ACTIVE" : "SECONDARY"}
           icon={
-            <CircleAlert
-              color={sensorType === "vibration" ? "#fff" : "#2188FF"}
-            />
+            <Waves color={sensorType === "vibration" ? "#fff" : "#2188FF"} />
           }
           onClick={() => {
             sensorType === "vibration"
