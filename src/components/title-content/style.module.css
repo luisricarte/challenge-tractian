@@ -13,5 +13,10 @@
 
 .titleButtonContainer {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+
+  justify-content: center;
+  gap: 0.25rem;
+  border: 2px dashed #d8dfe6;
+  padding: 0.5rem;
 }

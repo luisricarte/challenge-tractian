@@ -51,7 +51,10 @@ export const TitleContent = () => {
         </span>
       </div>
 
-      <div className={styles.titleButtonContainer}>{renderButtons()}</div>
+      <div className={styles.titleButtonContainer}>
+        <strong style={{ color: "#77818C" }}>Filtro (sensor type)</strong>
+        {renderButtons()}
+      </div>
     </div>
   );
 };
