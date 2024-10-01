@@ -9,14 +9,16 @@ import { useState, useMemo } from "react";
 import { useFilterSensorContext } from "../../contexts/FilterSensorContext";
 import { useQuery } from "react-query";
 import { reactQueryKeys } from "../../constants/react-query-keys";
+import { useCompanyContext } from "../../contexts/CompanyContext";
 
 interface ILeftSideBar extends HTMLDivProps {}
 
 export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const { sensorType } = useFilterSensorContext();
-  const companyId = "662fd0ee639069143a8fc387";
+  const { companyId } = useCompanyContext();
 
+  console.log("companyid atual", companyId);
   const buildLocationTree = (data: Locations[]): TreeNode[] => {
     const nodes: { [key: string]: TreeNode } = {};
     const buildingTree = [] as TreeNode[];
@@ -82,12 +84,13 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
   };
 
   const { data: locationsData, isLoading: isLoadingLocations } = useQuery({
-    queryKey: [reactQueryKeys.queries.findAllLocation],
+    queryKey: [`${reactQueryKeys.queries.findAllLocation}-${companyId}`],
     queryFn: () => companiesService.findAllLocations(companyId),
+    enabled: !!companyId,
   });
 
   const { data: assetsData, isLoading: isLoadingAssets } = useQuery({
-    queryKey: [reactQueryKeys.queries.findAllAssets],
+    queryKey: [`${reactQueryKeys.queries.findAllAssets}-${companyId}`],
     queryFn: () => companiesService.findAllAssets(companyId),
     enabled: !!locationsData,
   });
@@ -100,14 +103,27 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
     return null;
   }, [assetsData]);
 
-  const filterTree = (tree: TreeNode[], term: string): TreeNode[] => {
+  const filterTree = (
+    tree: TreeNode[],
+    term: string,
+    sensorType: string | null
+  ): TreeNode[] => {
     return tree
       .map((node) => {
-        if (node.name.toLowerCase().includes(term.toLowerCase())) {
+        const matchesTerm = node.name
+          .toLowerCase()
+          .includes(term.toLowerCase());
+
+        const matchesSensorType =
+          sensorType === null ||
+          (node.sensorType && node.sensorType === sensorType);
+
+        if (matchesTerm && matchesSensorType) {
           return node;
         }
+
         if (node.children) {
-          const filteredChildren = filterTree(node.children, term);
+          const filteredChildren = filterTree(node.children, term, sensorType);
           if (filteredChildren.length > 0) {
             return { ...node, children: filteredChildren };
           }
@@ -119,10 +135,11 @@ export const LeftSideBar: React.FC<ILeftSideBar> = () => {
 
   const filteredData = useMemo(() => {
     if (!finalData) return null;
-    return searchTerm ? filterTree(finalData, searchTerm) : finalData;
-  }, [searchTerm, finalData]);
+    return filterTree(finalData, searchTerm, sensorType);
+  }, [searchTerm, finalData, sensorType]);
 
   const isLoading = isLoadingLocations || isLoadingAssets;
+
   const renderMenuItems = (arvore: TreeNode[]) => {
     return arvore.map((item, index) => {
       return item.sensorType != null ? (

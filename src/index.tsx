@@ -6,17 +6,20 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ActiveAssetProvider } from "./contexts/ActiveAssetContext";
 import { FilterSensorProvider } from "./contexts/FilterSensorContext";
+import { CompanyProvider } from "./contexts/CompanyContext";
 
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <QueryClientProvider client={queryClient}>
-      <FilterSensorProvider>
-        <ActiveAssetProvider>
-          <App />
-        </ActiveAssetProvider>
-      </FilterSensorProvider>
+      <CompanyProvider>
+        <FilterSensorProvider>
+          <ActiveAssetProvider>
+            <App />
+          </ActiveAssetProvider>
+        </FilterSensorProvider>
+      </CompanyProvider>
     </QueryClientProvider>
   </BrowserRouter>
 );
