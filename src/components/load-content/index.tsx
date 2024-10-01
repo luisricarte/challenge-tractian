@@ -10,7 +10,7 @@ export const LoadContent = () => {
         width: "100%",
         gap: "0.5rem",
         paddingTop: "1rem",
-        height: "700px",
+        height: "675px",
       }}
     >
       <LeftSideBar />
